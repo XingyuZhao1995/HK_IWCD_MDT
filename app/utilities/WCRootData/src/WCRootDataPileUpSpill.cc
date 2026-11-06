@@ -12,6 +12,8 @@ WCRootDataPileUpSpill::WCRootDataPileUpSpill()
     fPupSpillTreeName = "pupspillT";
 
     fFileNameToBeCopied = "";
+
+    fPupSpill.Clear();
 }
 
 WCRootDataPileUpSpill::~WCRootDataPileUpSpill()
@@ -65,16 +67,17 @@ void WCRootDataPileUpSpill::CreateTree(const char *prefix, const vector<string> 
     this->GetOutFileIdNumber(fOutFileNum, sOutFileNum);
 
     if( prefix!=0 ){ fOutFilePrefix = TString(prefix); }
+    // Remember the branches, as FillTree creates the next output files without arguments
+    if( list.size()>0 ){ fOutEvtList = list; }
     TString OutFileName = fOutFilePrefix + "." + sOutFileNum + ".root";
     std::cout<<" Creating new output file: " << OutFileName <<std::endl;
     fOutFileNum += 1;
-    this->WCRootData::CreateTree(OutFileName,list);
+    this->WCRootData::CreateTree(OutFileName,fOutEvtList);
 
     TFile *f = fWCSimT->GetCurrentFile();
     fPupSpillT = new TTree(fPupSpillTreeName, "Pile-up spill tree");
     fPupSpillT->SetDirectory(f);
     fPupSpill.CreateBranch(fPupSpillT);
-    fPupSpill.Clear();
 
     fCurSpill = 0;
 }
@@ -126,6 +129,14 @@ void WCRootDataPileUpSpill::AddInteraction(const WCRootDataNuInt *aNuInt,
                                            float offset_time,
                                            int bunch_id)
 {
+    if( fPupSpill.NNuIntTot>=(unsigned int)kMaxNuInt )
+    {
+        std::cout<<" [ERROR] WCRootDataPileUpSpill::AddInteraction " <<std::endl;
+        std::cout<<"  - Number of interactions in this spill exceeds kMaxNuInt: " << kMaxNuInt <<std::endl;
+        std::cout<<" -> EXIT "<< std::endl;
+        exit(-1);
+    }
+
     fPupSpill.NuIntType[fPupSpill.NNuIntTot] = aNuInt->GetInteractionType();
     fPupSpill.NuIntTime[fPupSpill.NNuIntTot] = offset_time;
     fPupSpill.NuIntBunch[fPupSpill.NNuIntTot] = bunch_id; 
@@ -138,6 +149,13 @@ void WCRootDataPileUpSpill::AddInteraction(const WCRootDataNuInt *aNuInt,
 
     const int iFirst = fPupSpill.NTracks;
     const int nTrackTmp = ((TClonesArray*)fSpEvt[0]->GetTrigger(0)->GetTracks())->GetEntries();
+    if( nTrackTmp>kMaxTracks )
+    {
+        std::cout<<" [ERROR] WCRootDataPileUpSpill::AddInteraction " <<std::endl;
+        std::cout<<"  - Number of tracks in this spill (" << nTrackTmp <<") exceeds kMaxTracks: " << kMaxTracks <<std::endl;
+        std::cout<<" -> EXIT "<< std::endl;
+        exit(-1);
+    }
     for(int i=iFirst; i<nTrackTmp; i++)
     {
         fPupSpill.TrackNuIntIdx[i] = fPupSpill.NNuIntTot;

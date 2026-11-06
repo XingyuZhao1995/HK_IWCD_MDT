@@ -13,7 +13,7 @@ appGenPileUpSpill
 
 
 .idea
-build-*
-install-*
+build*
+install*
 
 *.DS_Store

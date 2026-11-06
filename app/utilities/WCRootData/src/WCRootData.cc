@@ -180,24 +180,37 @@ void WCRootData::CreateTree(const char *filename, const vector<string> &list)
     TString bAddress = "WCSimRootEvent";
 
     fWCSimT = new TTree("wcsimT", "Processed WCSim Tree for pile-up");
+    // Existing event objects are kept when moving on to the next output file,
+    // since they hold the spill that is about to be filled
+    // (see WCRootDataPileUpSpill::FillTree)
     if( list.size()==0 )
     {
-        fSpEvt.push_back( new WCSimRootEvent() );
-        fSpEvt[0]->Initialize();
+        if( fSpEvt.empty() )
+        {
+            fSpEvt.push_back( new WCSimRootEvent() );
+            fSpEvt[0]->Initialize();
+        }
         TTree::SetBranchStyle(branchStyle);
         fWCSimT->Branch(bName, bAddress, &fSpEvt[0], bufferSize, 2);
     }
-    else  
+    else
     {
-        fSpEvt.clear();
-        fSpEvt = vector<WCSimRootEvent*>(list.size(), 0);
-        isOD.clear();
-        isOD = vector<bool>(list.size(),false);
+        const bool createEvts = fSpEvt.size()!=list.size();
+        if( createEvts )
+        {
+            fSpEvt.clear();
+            fSpEvt = vector<WCSimRootEvent*>(list.size(), 0);
+            isOD.clear();
+            isOD = vector<bool>(list.size(),false);
+        }
         for(unsigned int i=0; i<list.size(); i++)
         {
 //            fSpEvt.push_back( new WCSimRootEvent() );
-            fSpEvt[i] = new WCSimRootEvent();
-            fSpEvt[i]->Initialize();
+            if( createEvts )
+            {
+                fSpEvt[i] = new WCSimRootEvent();
+                fSpEvt[i]->Initialize();
+            }
             TTree::SetBranchStyle(branchStyle);
             fWCSimT->Branch(list[i].c_str(), bAddress, &fSpEvt[i], bufferSize, 2);
             if ( list[i].find("OD")!=std::string::npos ) isOD[i] = true;
@@ -542,6 +555,11 @@ void WCRootData::CopyTree(const char *filename,
 {
 
 	TFile *fin = TFile::Open(filename);
+	// Some files (e.g. reduced WCSim files) name this tree "settings"
+	if( TString(treename)=="Settings" && !fin->FindKey(treename) && fin->FindKey("settings") )
+	{
+		treename = "settings";
+	}
 	if( !fin->FindKey(treename) )
 	{
 		fin->Close();

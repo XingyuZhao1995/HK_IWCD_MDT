@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 #include "TRandom3.h"
 
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
 
     float nuIntTime; // interaction time
     int nuIntBunch;  // bunch id number 
-    const int PCTLVerbose = (int)fTotalNumofSpills/10;
+    const int PCTLVerbose = std::max(fTotalNumofSpills/10, 1);
     std::cout<<" Will be generating " << fTotalNumofSpills <<" pile-up spills " <<std::endl;
     for(int i=0; i<fTotalNumofSpills ; i++)
     {

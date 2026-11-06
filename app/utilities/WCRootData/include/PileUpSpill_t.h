@@ -1,7 +1,9 @@
 #pragma once
 
 const int kMaxNuInt = 200;
-const int kMaxTracks = 5000;
+// Limit on the total number of tracks of all interactions in one spill.
+// Single NEUT events in WCSim files can have >10k saved tracks.
+const int kMaxTracks = 1000000;
 
 struct PileUpSpill_t
 {

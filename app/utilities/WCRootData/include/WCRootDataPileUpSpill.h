@@ -43,6 +43,7 @@ class WCRootDataPileUpSpill : public WCRootData
         int fOutFileNum; 
         int fNumOfSpillsPerFile;
         int fCurSpill;
+        vector<string> fOutEvtList;
 
         PileUpSpill_t fPupSpill;
         TTree *fPupSpillT;
