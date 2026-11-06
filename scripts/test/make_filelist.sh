@@ -42,3 +42,6 @@ do
     break
   fi
 done
+
+# Delete existing output files
+rm -rf /vols/hyperk/users/xzhao/HK/IWCD/OutputFiles/MDT_output/*.root

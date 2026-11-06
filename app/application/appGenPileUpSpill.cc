@@ -117,7 +117,7 @@ int main(int argc, char **argv)
         // Let there be at least one interaction 
         int nThisIDNuInt = 0;
         int nThisBeamBkg = 0;
-        if(nThisIDNuInt + nThisBeamBkg < 1){
+        if((nThisIDNuInt + nThisBeamBkg) < 1){
             nThisIDNuInt = daIDNuInt->DrawNumOfInteraction();
             nThisBeamBkg = daBeamBkg->DrawNumOfInteraction();
         }
