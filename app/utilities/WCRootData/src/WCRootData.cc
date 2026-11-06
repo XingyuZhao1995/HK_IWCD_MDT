@@ -69,7 +69,7 @@ void WCRootData::AddTrueHitsToMDT(MDTManager *mdt)
 }
 
 
-void WCRootData::AddTrueHitsToMDT(HitTubeCollection *hc, PMTResponse *pr, float intTime, int iPMT)
+void WCRootData::AddTrueHitsToMDT(HitTubeCollection *hc, PMTResponse *pr, float intTime, int iPMT, int nuIntIdx)
 {
 	// Set all tubes no matter how many of true hits, anyway
 	// Position and orientation are also set to each tube
@@ -98,6 +98,7 @@ void WCRootData::AddTrueHitsToMDT(HitTubeCollection *hc, PMTResponse *pr, float 
             if( aHitTime->GetParentID()<0 ){ continue; }
 
             TrueHit *th = new TrueHit(truetime+intTime, aHitTime->GetParentID());
+            th->SetNuIntIdx(nuIntIdx);
 
             for(int k=0; k<3; k++){ th->SetPosition(k, aHitTime->GetPhotonEndPos(k)); }
             for(int k=0; k<3; k++){ th->SetDirection(k, aHitTime->GetPhotonEndDir(k)); }
@@ -108,7 +109,7 @@ void WCRootData::AddTrueHitsToMDT(HitTubeCollection *hc, PMTResponse *pr, float 
             th->SetStartEnergy(aHitTime->GetPhotonStartEnergy());
             th->SetEnergy(aHitTime->GetPhotonEndEnergy());
             th->SetCreatorProcess((int)(aHitTime->GetPhotonCreatorProcess()));
-            if( !pr->ApplyDE(th,&(*hc)[tubeID]) ){ continue; }
+            if( !pr->ApplyDE(th,&(*hc)[tubeID]) ){ delete th; continue; }
 
             (&(*hc)[tubeID])->AddRawPE(th);
         }
@@ -263,6 +264,8 @@ void WCRootData::AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int eventID
     std::vector<TVector3> photonStartDir;
     std::vector<TVector3> photonEndDir;
     std::vector<ProcessType_t> photonCreatorProcess;
+    // Position of the first true hit of each tube in the CherenkovHitTime array
+    map<int, int> firstPEPos;
     for(hc->Begin(); !hc->IsEnd(); hc->Next())
     {
         // Get tube ID
@@ -285,10 +288,12 @@ void WCRootData::AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int eventID
             photonEndPos.push_back(TVector3(PEs[iPE]->GetPosition(0),PEs[iPE]->GetPosition(1),PEs[iPE]->GetPosition(2)));
             photonStartDir.push_back(TVector3(PEs[iPE]->GetStartDirection(0),PEs[iPE]->GetStartDirection(1),PEs[iPE]->GetStartDirection(2)));
             photonEndDir.push_back(TVector3(PEs[iPE]->GetDirection(0),PEs[iPE]->GetDirection(1),PEs[iPE]->GetDirection(2)));
-            photonCreatorProcess.push_back((ProcessType_t)(PEs[iPE]->GetCreatorProcess()));
+            // A negative parent means dark noise, as such hits are not read from the input
+            photonCreatorProcess.push_back(PEs[iPE]->GetParentId()<0 ? kDarkNoise : (ProcessType_t)(PEs[iPE]->GetCreatorProcess()));
         }
 
-        anEvent->AddCherenkovHit(tubeID,
+        WCSimRootCherenkovHit *aCkovHit =
+            anEvent->AddCherenkovHit(tubeID,
                                 mPMTID,
                                 mPMT_PMTID,
                                 truetime,
@@ -301,6 +306,7 @@ void WCRootData::AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int eventID
                                 photonStartDir,
                                 photonEndDir,
                                 photonCreatorProcess);
+        firstPEPos[tubeID] = aCkovHit->GetTotalPe(0);
 
         truetime.clear();
         primaryParentID.clear();
@@ -370,7 +376,14 @@ void WCRootData::AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int eventID
 
                     if( doFill ) 
                     {
-                        vector<int> true_pe_comp = aPH->GetParentCompositionDigi(i);
+                        // Truth matching as in WCSim: positions in the CherenkovHitTime array of trigger 0.
+                        // A digit without true hits (afterpulse, -2) keeps its composition.
+                        vector<int> photon_ids = aPH->GetPEIndicesDigi(i);
+                        if( photon_ids.empty() ){ photon_ids = aPH->GetParentCompositionDigi(i); }
+                        else
+                        {
+                            for(int &id : photon_ids){ id += firstPEPos[tubeID]; }
+                        }
                         t = t +  hitTimeOffset - triggerTime;
                         float q = aPH->GetChargeDigi(i);
                         anEvent->AddCherenkovDigiHit(q,
@@ -378,7 +391,7 @@ void WCRootData::AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int eventID
                                                      tubeID,
                                                      mPMTID,
                                                      mPMT_PMTID,
-                                                     true_pe_comp);
+                                                     photon_ids);
                         nHits += 1;
                         sumQ += q;
                         nCount+=1;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 const int kMaxNuInt = 200;
 // Limit on the total number of tracks of all interactions in one spill.
 // Single NEUT events in WCSim files can have >10k saved tracks.
@@ -13,17 +15,26 @@ struct PileUpSpill_t
     unsigned int NuIntType[kMaxNuInt];
     float NuIntTime[kMaxNuInt];  
     unsigned int NuIntBunch[kMaxNuInt];
-    int Mode[kMaxNuInt];
-    int NuPDG[kMaxNuInt];
-    float NuEne[kMaxNuInt];
-    float NuPos[kMaxNuInt][3];
-    float NuDir[kMaxNuInt][3];
+    // Truth of each interaction, from the NEUT RooTracker tree of its input file
+    int NeutCode[kMaxNuInt];
+    int NuPDG[kMaxNuInt];      // Incoming neutrino
+    float NuEne[kMaxNuInt];    // MeV
+    float NuPos[kMaxNuInt][3]; // Vertex, cm
+    float NuDir[kMaxNuInt][3]; // Unit vector
     float EdepoOD[kMaxNuInt];
     unsigned int FileIdNum[kMaxNuInt];
     unsigned int EventIdNum[kMaxNuInt];
     
     unsigned int NTracks;
     unsigned int TrackNuIntIdx[kMaxTracks];
+
+    // Interaction index of each true hit, -1 for dark noise. Same order as
+    // GetCherenkovHitTimes() of trigger 0 in wcsimrootevent and wcsimrootevent_OD.
+    std::vector<int> PENuIntIdx;
+    std::vector<int> PENuIntIdx_OD;
+    // ROOT reads a vector branch through a pointer to it
+    std::vector<int> *PENuIntIdxPtr = &PENuIntIdx;
+    std::vector<int> *PENuIntIdx_ODPtr = &PENuIntIdx_OD;
 
     void Clear()
     {
@@ -36,7 +47,7 @@ struct PileUpSpill_t
             NuIntTime[i] = -99999.;
             NuIntBunch[i] = 99999;
             EdepoOD[i] = -99999.;
-            Mode[i] = -99999;
+            NeutCode[i] = -99999;
             NuPDG[i] = -99999;
             NuEne[i] = -99999.; 
             for(int j=0; j<3; j++)
@@ -52,6 +63,8 @@ struct PileUpSpill_t
         {
             TrackNuIntIdx[i] = 99999;
         }
+        PENuIntIdx.clear();
+        PENuIntIdx_OD.clear();
     }
 
     void CreateBranch(TTree *t)
@@ -62,6 +75,7 @@ struct PileUpSpill_t
         t->Branch("NuIntType",      NuIntType,      "NuIntType[NNuIntTot]/i");
         t->Branch("NuIntTime",      NuIntTime,      "NuIntTime[NNuIntTot]/F");
         t->Branch("NuIntBunch",     NuIntBunch,     "NuIntBunch[NNuIntTot]/i");
+        t->Branch("NeutCode",  NeutCode,  "NeutCode[NNuIntTot]/I");
         t->Branch("NuPDG",     NuPDG,     "NuPDG[NNuIntTot]/I");
         t->Branch("NuEne",     NuEne,     "NuEne[NNuIntTot]/F");
         t->Branch("NuPos",     NuPos,     "NuPos[NNuIntTot][3]/F");
@@ -71,6 +85,8 @@ struct PileUpSpill_t
         t->Branch("EventIdNum",     EventIdNum,     "EventIdNum[NNuIntTot]/i");
         t->Branch("NTracks",        &NTracks,       "NTracks/i");
         t->Branch("TrackNuIntIdx",  TrackNuIntIdx,  "TrackNuIntIdx[NTracks]/i");
+        t->Branch("PENuIntIdx",     &PENuIntIdx);
+        t->Branch("PENuIntIdx_OD",  &PENuIntIdx_OD);
     }
 
     void SetBranch(TTree *t)
@@ -81,7 +97,7 @@ struct PileUpSpill_t
         t->SetBranchAddress("NuIntType",        NuIntType);
         t->SetBranchAddress("NuIntTime",        NuIntTime);
         t->SetBranchAddress("NuIntBunch",       NuIntBunch);
-        t->SetBranchAddress("Mode",             Mode);
+        t->SetBranchAddress("NeutCode",         NeutCode);
         t->SetBranchAddress("NuPDG",            NuPDG);
         t->SetBranchAddress("NuEne",            NuEne);
         t->SetBranchAddress("NuPos",            NuPos);
@@ -91,5 +107,7 @@ struct PileUpSpill_t
         t->SetBranchAddress("EventIdNum",       EventIdNum);
         t->SetBranchAddress("NTracks",          &NTracks);
         t->SetBranchAddress("TrackNuIntIdx",    TrackNuIntIdx);
+        t->SetBranchAddress("PENuIntIdx",       &PENuIntIdxPtr);
+        t->SetBranchAddress("PENuIntIdx_OD",    &PENuIntIdx_ODPtr);
     }
 };

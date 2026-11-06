@@ -2,6 +2,15 @@
 #include "Configuration.h"
 #include "HitTube.h"
 
+#include <cmath>
+
+// Moves a time onto the grid of the sliding trigger window.
+// Late hits (e.g. radioactive decays) do not fit in an int in units of the step.
+static double AlignToStep(const double t, const double step)
+{
+    return t>0 ? std::trunc(t/step)*step : (std::trunc(t/step)-1.)*step;
+}
+
 const double TriggerAlgo::fLongTime = 40E9; // ns = 40s. loooong time for SN simulations
 
 TriggerAlgo::TriggerAlgo(const string &pmtname) :
@@ -133,8 +142,7 @@ void TriggerAlgo::NDigits(HitTubeCollection *hc, TriggerInfo* ti)
         double tWindowUp = 0.;
         //double tWindowLow = 0.;
         double tWindowLow = times[0];
-        if (tWindowLow>0) tWindowLow = ((int)(tWindowLow/stepSize))*stepSize;
-        else tWindowLow = ((int)(tWindowLow/stepSize)-1)*stepSize;
+        tWindowLow = AlignToStep(tWindowLow, stepSize);
         const double tWindowMax = std::max(tWindowLow, (double)(tLastHit - fNDigitsWindow)) + stepSize;
         
         //  - Slide the time window with a width of "fNDigitsWindow"
@@ -165,8 +173,7 @@ void TriggerAlgo::NDigits(HitTubeCollection *hc, TriggerInfo* ti)
             if( (int)Times.size()>fNDigitsThreshold )
             {
                 trigTime = Times[fNDigitsThreshold];
-                if (trigTime>0) trigTime = ((int)(trigTime/stepSize))*stepSize;
-                else trigTime = ((int)(trigTime/stepSize)-1)*stepSize;
+                trigTime = AlignToStep(trigTime, stepSize);
                 float trigTimeLow = trigTime + fPreTriggerWindow[TriggerType::eNDigits];
                 float trigTimeUp = trigTime + fPostTriggerWindow[TriggerType::eNDigits];
 
@@ -196,7 +203,8 @@ void TriggerAlgo::NDigits(HitTubeCollection *hc, TriggerInfo* ti)
             
             if( isTriggerFound )
             {
-                tWindowLow = trigTime + fPostTriggerWindow[TriggerType::eNDigits];
+                // In double: at late times a float is too coarse to move past the trigger
+                tWindowLow = (double)trigTime + fPostTriggerWindow[TriggerType::eNDigits];
             }
             else
             {
@@ -204,8 +212,7 @@ void TriggerAlgo::NDigits(HitTubeCollection *hc, TriggerInfo* ti)
                 if (tWindowLow<next_hit_time)
                 {
                     tWindowLow = next_hit_time;
-                    if (tWindowLow>0) tWindowLow = ((int)(tWindowLow/stepSize))*stepSize;
-                    else tWindowLow = ((int)(tWindowLow/stepSize)-1)*stepSize;
+                    tWindowLow = AlignToStep(tWindowLow, stepSize);
                 }
             }
             tWindowUp = tWindowLow + fNDigitsWindow;

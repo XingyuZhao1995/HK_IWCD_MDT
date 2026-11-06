@@ -26,7 +26,7 @@ class MDTManager
         void RegisterPMTType(const string &s="Def", PMTResponse *p=0);
 
         void DoInitialize();
-        void DoAddDark(const string &s="Def");
+        void DoAddDark(const string &s="Def", double tFirstNoHit=0., double tLastNoHit=-1.); // See PMTNoise::AddPhotoElectrons
         void DoDigitize(const string &s="Def");   
         void DoTrigger(const string &s="Def");
         void DoAddAfterpulse(const string &s="Def");

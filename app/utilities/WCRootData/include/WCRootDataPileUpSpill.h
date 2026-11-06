@@ -31,6 +31,8 @@ class WCRootDataPileUpSpill : public WCRootData
         void FillTree();
         void WriteTree();
         void AddInteraction(const WCRootDataNuInt*, float offset_time=0., int bunch_id=99999);
+        using WCRootData::AddDigiHits;
+        void AddDigiHits(HitTubeCollection*, TriggerInfo*, int event_id=0, int iPMT=0);
 
         void SetNumOfSpillesSavedPerFile(const int i){ fNumOfSpillsPerFile = i; }
         void SetFileNameForCopyTree(const char *f){ fFileNameToBeCopied = TString(f); }

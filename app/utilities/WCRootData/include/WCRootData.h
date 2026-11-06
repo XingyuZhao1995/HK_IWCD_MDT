@@ -50,7 +50,8 @@ class WCRootData
         WCSimRootTrigger *GetTrigger(int i, int iPMT=0) const { return fSpEvt[iPMT]->GetTrigger(i); }
 
         void AddTrueHitsToMDT(MDTManager*);
-        void AddTrueHitsToMDT(HitTubeCollection*, PMTResponse*, float offset_time=0., int iPMT=0);
+        void AddTrueHitsToMDT(HitTubeCollection*, PMTResponse*, float offset_time=0., int iPMT=0, int nuIntIdx=-1);
+        void SetTubes(HitTubeCollection*, const int);
         void AddDigiHits(MDTManager*, int event_id=0, int iPMT=0);
         void AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int even_it=0, int iPMT=0);
         void AddTracks(const WCSimRootTrigger*, float offset_time=0., int iPMT=0);
@@ -85,7 +86,6 @@ class WCRootData
         int fPMTId;
 
     private:
-		void SetTubes(HitTubeCollection*, const int);
         TString fOutFileName;
 };
 

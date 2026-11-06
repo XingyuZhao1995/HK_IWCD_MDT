@@ -42,7 +42,9 @@ class PMTNoise
         int GetNoiseTube(const int i) const { return fNoisePMT[i]; }
         double GetNoiseTime(const int i) const { return fNoiseTime[i]; }
 
-        void AddPhotoElectrons(HitTubeCollection*);
+        // Mode 1 adds dark noise around true hits, so without true hits there is nothing to add.
+        // If tLastNoHit>=tFirstNoHit, such an event gets dark noise around this time range instead.
+        void AddPhotoElectrons(HitTubeCollection*, double tFirstNoHit=0., double tLastNoHit=-1.);
         void Add(HitTubeCollection*, double, double);
         void FindRanges(HitTubeCollection*, vector<pair<double, double>>&);
 

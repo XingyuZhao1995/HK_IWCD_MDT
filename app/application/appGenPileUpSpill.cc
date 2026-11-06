@@ -124,6 +124,10 @@ int main(int argc, char **argv)
                  <<endl;
         }
 
+        // All PMTs are needed for dark noise, even when this spill has no interactions
+        for(int k=0; k<NPMTType; k++)
+            daIDNuInt->SetTubes(MDT->GetHitTubeCollection(fPMTType[k]), k);
+
         // ID interactions
         for(int j=0; j<nThisIDNuInt; j++)
         {
@@ -132,8 +136,9 @@ int main(int argc, char **argv)
             bt->DrawInteractionTime(nuIntTime, nuIntBunch);
             
             // Add true hits of this interaction to MDT
+            const int nuIntIdx = daPileUp->GetPileUpSpill()->NNuIntTot;
             for(int k=0; k<NPMTType; k++)
-                daIDNuInt->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k);
+                daIDNuInt->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k, nuIntIdx);
 
             // Add information about this interaction
             daPileUp->AddInteraction(daIDNuInt, nuIntTime, nuIntBunch);
@@ -145,8 +150,9 @@ int main(int argc, char **argv)
             daBeamBkg->Next();
 
             bt->DrawInteractionTime(nuIntTime, nuIntBunch);
+            const int nuIntIdx = daPileUp->GetPileUpSpill()->NNuIntTot;
             for(int k=0; k<NPMTType; k++)
-                daBeamBkg->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k);
+                daBeamBkg->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k, nuIntIdx);
             daPileUp->AddInteraction(daBeamBkg, nuIntTime, nuIntBunch);
         }
 
@@ -154,7 +160,8 @@ int main(int argc, char **argv)
         // Add dark noise hits, and then make digitized hits
         for(int j=0; j<NPMTType; j++)
         {
-            MDT->DoAddDark(fPMTType[j]);
+            // A spill without true hits gets dark noise around the beam bunches
+            MDT->DoAddDark(fPMTType[j], 0., kBunchInterval*(kNBunches-1));
             MDT->DoDigitize(fPMTType[j]);
             MDT->DoTrigger(fPMTType[j]);
 

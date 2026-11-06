@@ -29,6 +29,9 @@ class HitTube
     public: 
         HitTube(int);
         virtual ~HitTube();
+        // Owns its true hits, so must not be copied
+        HitTube(const HitTube&) = delete;
+        HitTube& operator=(const HitTube&) = delete;
         void SetTubeID(const int i){ fTubeID = i; }
         int GetTubeID() const { return fTubeID; }
         void SetmPMTID(const int i){ fmPMTID = i; }
@@ -41,10 +44,20 @@ class HitTube
 		void SetOrientation(int i, float f) { fOrientation[i] = f; }
 
 
+        // For a true hit that does not come from a photon, i.e. dark noise.
+        // Photon information is the same as in WCSimWCAddDarkNoise.
         void AddRawPE(const float t, const int id=9999999)
             { 
-                fPhotoElectrons.push_back(new TrueHit(t, id));
-                fNRawPE+=1; 
+                TrueHit *th = new TrueHit(t, id);
+                th->SetStartTime(t);
+                for(int i=0; i<3; i++)
+                {
+                    th->SetPosition(i, fPosition[i]);
+                    th->SetStartPosition(i, fPosition[i]);
+                    th->SetDirection(i, -fOrientation[i]);
+                    th->SetStartDirection(i, -fOrientation[i]);
+                }
+                this->AddRawPE(th);
             }
         void AddRawPE(TrueHit* th)
             { 
@@ -63,11 +76,14 @@ class HitTube
         }
         const vector<TrueHit*>& GetPhotoElectrons() const { return fPhotoElectrons; }
 
-        void AddDigiHit(const float t, const float q, const vector<int> &id=vector<int>())
+        // id: parent track IDs of the true hits making up this digit
+        // peIdx: positions of these true hits in GetPhotoElectrons()
+        void AddDigiHit(const float t, const float q, const vector<int> &id=vector<int>(), const vector<int> &peIdx=vector<int>())
             {
                 fTimeDigi.push_back( t );
                 fChargeDigi.push_back( q );
                 fParentCompDigi.push_back( id );
+                fPEIdxDigi.push_back( peIdx );
                 fNDigiHits+=1;
             }
 
@@ -75,6 +91,7 @@ class HitTube
         float GetTimeDigi(const int i) const { return fTimeDigi[i]; }
         float GetChargeDigi(const int i) const { return fChargeDigi[i]; }
         const vector<int>& GetParentCompositionDigi(const int i) const { return fParentCompDigi[i]; }
+        const vector<int>& GetPEIndicesDigi(const int i) const { return fPEIdxDigi[i]; }
 
         void SetDigiWF(const TH1F& hist)
         {
@@ -106,6 +123,7 @@ class HitTube
         vector<float> fTimeDigi;
         vector<float> fChargeDigi;
         vector<vector<int>> fParentCompDigi;
+        vector<vector<int>> fPEIdxDigi;
 
         TH1F* hDigiWF;
         float fPullT; 

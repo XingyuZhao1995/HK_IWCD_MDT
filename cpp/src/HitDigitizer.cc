@@ -2,6 +2,8 @@
 #include "Configuration.h"
 #include "TF1.h"
 #include "TFitResult.h"
+
+#include <cmath>
         
 HitDigitizer::HitDigitizer(int seed) :
 fPrecisionCharge(0.), 
@@ -52,6 +54,7 @@ void HitDigitizer::DigitizeTube(HitTube *aHT, PMTResponse *pr)
     double intgr_end = intgr_srt+fIntegWindow;
     vector<int> parent_composition;  
     parent_composition.clear();
+    vector<int> pe_indices;
 
     for(int iPE=0; iPE<NPE; iPE++)
     {
@@ -59,6 +62,7 @@ void HitDigitizer::DigitizeTube(HitTube *aHT, PMTResponse *pr)
         {
             sumSPE += pr->GetRawSPE(PEs[iPE], aHT);
             parent_composition.push_back( PEs[iPE]->GetParentId() );
+            pe_indices.push_back( iPE );
         }
         else
         {
@@ -74,15 +78,17 @@ void HitDigitizer::DigitizeTube(HitTube *aHT, PMTResponse *pr)
                 digiT += tSmeared;
                 digiQ = this->DoTruncate(digiQ, fPrecisionCharge);
                 digiT = this->DoTruncate(digiT, fPrecisionTiming);
-                aHT->AddDigiHit(digiT, digiQ, parent_composition);
+                aHT->AddDigiHit(digiT, digiQ, parent_composition, pe_indices);
             }
             sumSPE = 0.;
             parent_composition.clear(); 
+            pe_indices.clear();
 
             intgr_srt = PEs[iPE]->GetTime();
             intgr_end = intgr_srt+fIntegWindow;
             sumSPE += pr->GetRawSPE(PEs[iPE], aHT);
             parent_composition.push_back( PEs[iPE]->GetParentId() );
+            pe_indices.push_back( iPE );
         }
     }
 
@@ -97,7 +103,7 @@ void HitDigitizer::DigitizeTube(HitTube *aHT, PMTResponse *pr)
         digiT += tSmeared ;
         digiQ = this->DoTruncate(digiQ, fPrecisionCharge);
         digiT = this->DoTruncate(digiT, fPrecisionTiming);
-        aHT->AddDigiHit(digiT, digiQ, parent_composition);
+        aHT->AddDigiHit(digiT, digiQ, parent_composition, pe_indices);
     }
 }
 
@@ -143,7 +149,8 @@ double HitDigitizer::DoTruncate(const double x, const double precision)
 // The following is based on WCSimWCDigitizerBas::Truncate
 // in WCSimWCDigitizer.hh
     if(precision < 1E-10){ return x; }
-    return precision * (int)(x/precision); 
+    // Late hits (e.g. radioactive decays) do not fit in an int at this precision
+    return precision * std::trunc(x/precision);
 }
 
 // mPMT specific digitizer
@@ -243,8 +250,10 @@ void HitDigitizer_mPMT::DigitizeTube(HitTube *aHT, PMTResponse *pr)
     double intgr_end = intgr_srt+fIntegWindow;
     vector<int> parent_composition;  
     parent_composition.clear();
+    vector<int> pe_indices;
     vector<TrueHit*> digiPEs;
     digiPEs.clear();
+    int iFirstDigiPE = 0; // Position of digiPEs[0] in PEs
 
     for(int iPE=0; iPE<NPE; iPE++)
     {
@@ -276,16 +285,18 @@ void HitDigitizer_mPMT::DigitizeTube(HitTube *aHT, PMTResponse *pr)
                     digiT = this->DoTruncate(digiT, fPrecisionTiming);
 
                     double trueT = vDigiT[i] - 3*fDt;
-                    for (auto pe :digiPEs )
+                    for (unsigned int j=0; j<digiPEs.size(); j++)
                     {
+                        const TrueHit *pe = digiPEs[j];
                         if ( pe->GetTime()>vDigiT[i]-3*fDt && pe->GetTime()<vDigiT[i]+fHitInsensitivityPeriod*fDt ) // include dead time window
                         {
                             parent_composition.push_back(pe->GetParentId());
+                            pe_indices.push_back(iFirstDigiPE+j);
                             if (parent_composition.size()==1) trueT = pe->GetTime();
                         }
                     }
 
-                    aHT->AddDigiHit(digiT, digiQ, parent_composition);
+                    aHT->AddDigiHit(digiT, digiQ, parent_composition, pe_indices);
                     if (!aHT->GetDigiWF()) 
                     {
                         aHT->SetDigiWF(hWT);
@@ -295,9 +306,11 @@ void HitDigitizer_mPMT::DigitizeTube(HitTube *aHT, PMTResponse *pr)
                 }
 
                 parent_composition.clear(); 
+                pe_indices.clear();
             }
 
             digiPEs.clear();
+            iFirstDigiPE = iPE;
 
             intgr_srt = PEs[iPE]->GetTime();
             intgr_end = intgr_srt+fIntegWindow;
@@ -323,16 +336,18 @@ void HitDigitizer_mPMT::DigitizeTube(HitTube *aHT, PMTResponse *pr)
             digiT = this->DoTruncate(digiT, fPrecisionTiming);
 
             double trueT = vDigiT[i] - 3*fDt;
-            for (auto pe :digiPEs )
+            for (unsigned int j=0; j<digiPEs.size(); j++)
             {
+                const TrueHit *pe = digiPEs[j];
                 if ( pe->GetTime()>vDigiT[i]-3*fDt && pe->GetTime()<vDigiT[i]+fHitInsensitivityPeriod*fDt ) // include dead time window
                 {
                     parent_composition.push_back(pe->GetParentId());
+                    pe_indices.push_back(iFirstDigiPE+j);
                     if (parent_composition.size()==1) trueT = pe->GetTime();
                 }
             }
 
-            aHT->AddDigiHit(digiT, digiQ, parent_composition);
+            aHT->AddDigiHit(digiT, digiQ, parent_composition, pe_indices);
             if (!aHT->GetDigiWF()) 
             {   
                 aHT->SetDigiWF(hWT);
@@ -342,6 +357,7 @@ void HitDigitizer_mPMT::DigitizeTube(HitTube *aHT, PMTResponse *pr)
         }
 
         parent_composition.clear(); 
+        pe_indices.clear();
     }
 }
 

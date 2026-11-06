@@ -143,7 +143,7 @@ int PMTNoise::GetNumberOfGeneratedDarkHits() const
     return fNnoise;
 }
 
-void PMTNoise::AddPhotoElectrons(HitTubeCollection* hc)
+void PMTNoise::AddPhotoElectrons(HitTubeCollection* hc, double tFirstNoHit, double tLastNoHit)
 {
     // Get correct PMT numbers each time
     fNPMTs = hc->GetHitTubeIDList().size();
@@ -153,7 +153,14 @@ void PMTNoise::AddPhotoElectrons(HitTubeCollection* hc)
     vector< pair<double, double> > range;
     if( fDarkMode==1 )
     {
-        this->FindRanges(hc, range);
+        if( tLastNoHit>=tFirstNoHit && hc->GetTotalNumOfTrueHits()==0 )
+        {
+            range.push_back( pair<double, double>(tFirstNoHit-fWindow/2., tLastNoHit+fWindow/2.) );
+        }
+        else
+        {
+            this->FindRanges(hc, range);
+        }
     }
     else 
     {
@@ -277,6 +284,7 @@ void PMTNoise::AddAfterpulse(HitTubeCollection *hc, HitDigitizer *hd, PMTRespons
             const vector<int> comp = aPHAP->GetParentCompositionDigi(i);
             aPH->AddDigiHit(time, charge, comp);
         }
+        delete aPHAP;
     }
 
     int NDigiHitsAf = hc->GetTotalNumOfDigiHits();

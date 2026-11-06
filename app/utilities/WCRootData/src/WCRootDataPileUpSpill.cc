@@ -167,6 +167,23 @@ void WCRootDataPileUpSpill::AddInteraction(const WCRootDataNuInt *aNuInt,
     else if( aNuInt->GetInteractionType()==1 ){ fPupSpill.NBeamBkg += 1; }
 }
 
+void WCRootDataPileUpSpill::AddDigiHits(HitTubeCollection *hc, TriggerInfo *ti, int eventID, int iPMT)
+{
+    this->WCRootData::AddDigiHits(hc, ti, eventID, iPMT);
+
+    // True hits were saved tube by tube in this order, so this lines up with the CherenkovHitTime array
+    vector<int> &peNuIntIdx = iPMT==0 ? fPupSpill.PENuIntIdx : fPupSpill.PENuIntIdx_OD;
+    for(hc->Begin(); !hc->IsEnd(); hc->Next())
+    {
+        const HitTube *aPH = &(*hc)();
+        const vector<TrueHit*> &PEs = aPH->GetPhotoElectrons();
+        for(int iPE=0; iPE<aPH->GetNRawPE(); iPE++)
+        {
+            peNuIntIdx.push_back(PEs[iPE]->GetNuIntIdx());
+        }
+    }
+}
+
 void WCRootDataPileUpSpill::AddDigiHitsToMDT(MDTManager *mdt,
                                              float time_low,
                                              float time_up,
@@ -174,6 +191,7 @@ void WCRootDataPileUpSpill::AddDigiHitsToMDT(MDTManager *mdt,
 {
     const WCSimRootTrigger* aEvt = this->WCRootData::GetTrigger(0);
     const TClonesArray *allDigiHits = aEvt->GetCherenkovDigiHits();
+    const TClonesArray *allHitTimes = aEvt->GetCherenkovHitTimes();
     const int nAllDigiHits = allDigiHits->GetEntries();
 
     HitTubeCollection *hc = mdt->GetHitTubeCollection();
@@ -188,7 +206,12 @@ void WCRootDataPileUpSpill::AddDigiHitsToMDT(MDTManager *mdt,
         float q = aHit->GetQ();
         // int mPMT_module_id = aHit->GetmPMTId();
         // int mPMT_pmt_id = aHit->GetmPMT_PMTId();
+        // PhotonIds are positions in the hit time array, whereas MDT digits keep parent IDs
         vector<int> true_hit_ids = aHit->GetPhotonIds();
+        for(int &id : true_hit_ids)
+        {
+            if( id>=0 ){ id = ((WCSimRootCherenkovHitTime*)allHitTimes->At(id))->GetParentID(); }
+        }
 
         if( !hc->HasTube(tube_id) )
         {

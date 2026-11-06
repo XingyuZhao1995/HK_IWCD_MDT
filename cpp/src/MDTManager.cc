@@ -62,11 +62,11 @@ MDTManager::~MDTManager()
     fTrigInfo.clear();
 }
 
-void MDTManager::DoAddDark(const string &pmtname)
+void MDTManager::DoAddDark(const string &pmtname, double tFirstNoHit, double tLastNoHit)
 {
     if( this->HasThisPMTType(pmtname) )
     {
-        fDark[pmtname]->AddPhotoElectrons(fPHC[pmtname]);
+        fDark[pmtname]->AddPhotoElectrons(fPHC[pmtname], tFirstNoHit, tLastNoHit);
     }
 }
 

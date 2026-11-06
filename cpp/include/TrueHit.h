@@ -18,6 +18,7 @@ class TrueHit
         float GetStartEnergy() const { return fStartEnergy; }
         int GetPosBin(int i) const { return fBin[i]; }
         int GetCreatorProcess() const { return fCreatorProcess; }
+        int GetNuIntIdx() const { return fNuIntIdx; }
 
         void SetPosition(int i, float f) { fPosition[i] = f; }
         void SetDirection(int i, float f) { fDirection[i] = f; }
@@ -28,6 +29,7 @@ class TrueHit
         void SetStartEnergy(float f) { fStartEnergy = f; }
         void SetPosBin(int i, int b){ fBin[i] = b; }
         void SetCreatorProcess(int i){ fCreatorProcess = i; }
+        void SetNuIntIdx(int i){ fNuIntIdx = i; }
 
     private:
         double fTime;
@@ -41,4 +43,5 @@ class TrueHit
         int fParentId;
         int fBin[3];
         int fCreatorProcess;
+        int fNuIntIdx; // Interaction this hit came from when merging several. -1 if none, e.g. dark noise
 };

@@ -34,7 +34,7 @@ class WCRootDataNuInt : public WCRootData
 
         unsigned GetInteractionType() const { return fNuIntType; }
         virtual float GetEnergyDepositionInOD() const { return 0.; }
-        virtual void SetInteractionInformation(PileUpSpill_t*) const {};
+        void SetInteractionInformation(PileUpSpill_t*) const;
 
         void SetHasFriend(bool val) {fHasFriend=val;}
 
@@ -43,6 +43,13 @@ class WCRootDataNuInt : public WCRootData
 
         virtual void ReadFriend(const char* f){ cout<<" Reading friend: " << f <<endl; };
         virtual void CloseFriend(){};
+
+        void ReadRooTracker();
+        void ReadNextEntry();
+        bool HasSimulatedParticles() const;
+
+        TTree *fRooTrackerT;         // Owned by the current input file, 0 if it has no such tree
+        ND::NRooTrackerVtx *fRooVtx; // Owned by fRooTrackerT
 
         TRandom3 *fRnd;
         std::vector<pair<TString, int>> fFileList; 
