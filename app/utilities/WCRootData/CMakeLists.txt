@@ -35,3 +35,8 @@ pbuilder_library(
 )
 
 pbuilder_install_headers(${HEADERS})
+
+pbuilder_component_install_and_export(
+        COMPONENT WCRootData
+        LIBTARGETS WCRootData
+)

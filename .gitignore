@@ -15,3 +15,5 @@ appGenPileUpSpill
 .idea
 build-*
 install-*
+
+*.DS_Store
