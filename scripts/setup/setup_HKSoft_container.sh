@@ -8,5 +8,6 @@ source /usr/local/hk/hk-software/install-Linux_x86_64-gcc_8-python_3.8.13/setup.
 source /vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/WCSim/install/bin/this_wcsim.sh
 
 # Source MDT
+export MDTROOT=/vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT
 MDTPath="/vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/install/bin"
 export PATH=${MDTPath}:${PATH:-}

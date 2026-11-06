@@ -1,0 +1,13 @@
+# Pile-up config
+
+< ListIDNuIntFiles = ./input_nu.txt >
+< ListBeamBkgFiles = ./input_bkg.txt >
+< OutFileNamePrefix = /vols/hyperk/users/xzhao/HK/IWCD/OutputFiles/MDT_output/test >
+< MDTParFile = /vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/parameter/MDTParamenter_IWCD.txt >
+< InitialSeed = 1234 >
+< IDNuIntRate = 2 >
+< BeamBkgRate = 0 >
+< UseOD = 1 >
+
+< NumOfSpillsSavedPerFile = 100 >
+< TotalNumOfSpills = 200 >
