@@ -104,7 +104,7 @@ Most applications follow this sequence:
 *   **`appGenPileUpSpill`**:
     *   **Purpose**: Generates "spills" containing multiple neutrino interactions and beam background events (e.g., for T2K/Hyper-K).
     *   **Logic**:
-        *   Uses `WCRootDataIDNuInt` and `WCRootDataBeamBkg` to manage input files.
+        *   Uses `WCRootDataIDNuInt` and `WCRootDataBeamBkg` to manage input files. Input events are read in list order and used at most once; generation stops early if they run out.
         *   Uses `BeamTiming` to distribute events in time according to beam bunch structure.
         *   Merges hits from all interactions into a single `MDTManager` instance before digitizing.
 *   **`appWCTESingleEvent` / `appIWCDSingleEvent`**:

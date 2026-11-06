@@ -23,6 +23,7 @@ class WCRootDataNuInt : public WCRootData
 
         void SetSeed(const int i){ fRnd->SetSeed(i); }
         void LoadFiles(const char*, const std::vector<string> &v=vector<string>()); 
+        // Moves to the next unused event. Returns false when there are none left.
         virtual bool Next();
 
         void SetNDigitsFileIDNumber(int i){ fNDigitsFileIdNum = i; }
@@ -45,7 +46,7 @@ class WCRootDataNuInt : public WCRootData
         virtual void CloseFriend(){};
 
         void ReadRooTracker();
-        void ReadNextEntry();
+        bool ReadNextEntry();
         bool HasSimulatedParticles() const;
 
         TTree *fRooTrackerT;         // Owned by the current input file, 0 if it has no such tree

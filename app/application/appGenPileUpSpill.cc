@@ -110,7 +110,8 @@ int main(int argc, char **argv)
     float nuIntTime; // interaction time
     int nuIntBunch;  // bunch id number 
     const int PCTLVerbose = std::max(fTotalNumofSpills/10, 1);
-    std::cout<<" Will be generating " << fTotalNumofSpills <<" pile-up spills " <<std::endl;
+    int nSavedSpills = 0;
+    std::cout<<" Will be generating up to " << fTotalNumofSpills <<" pile-up spills " <<std::endl;
     for(int i=0; i<fTotalNumofSpills ; i++)
     {
         // Number of ID/Beam bkg interactions of this spill
@@ -134,10 +135,14 @@ int main(int argc, char **argv)
         for(int k=0; k<NPMTType; k++)
             daIDNuInt->SetTubes(MDT->GetHitTubeCollection(fPMTType[k]), k);
 
+        // Each input event is used once, so the input can run out before all the spills are made
+        bool hasEnoughInput = true;
+
         // ID interactions
         for(int j=0; j<nThisIDNuInt; j++)
         {
-            daIDNuInt->Next();
+            if( !daIDNuInt->Next() ){ hasEnoughInput = false; break; }
+
             // Drawing interaction time and bunch at which this interaction is taking place 
             bt->DrawInteractionTime(nuIntTime, nuIntBunch);
             
@@ -151,15 +156,23 @@ int main(int argc, char **argv)
         }
 
         // Repeating the above, but for beam bkg interactions
-        for(int j=0; j<nThisBeamBkg; j++)
+        for(int j=0; hasEnoughInput && j<nThisBeamBkg; j++)
         {
-            daBeamBkg->Next();
+            if( !daBeamBkg->Next() ){ hasEnoughInput = false; break; }
 
             bt->DrawInteractionTime(nuIntTime, nuIntBunch);
             const int nuIntIdx = daPileUp->GetPileUpSpill()->NNuIntTot;
             for(int k=0; k<NPMTType; k++)
                 daBeamBkg->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k, nuIntIdx);
             daPileUp->AddInteraction(daBeamBkg, nuIntTime, nuIntBunch);
+        }
+
+        // This spill did not get all the interactions drawn for it, so drop it.
+        // Only FillTree below puts a spill in the output, so nothing of it is saved.
+        if( !hasEnoughInput )
+        {
+            std::cout<<" No input events left for spill " << i <<": stopping here" <<std::endl;
+            break;
         }
 
         // Now all the true hits have been merged into one spill
@@ -177,6 +190,7 @@ int main(int argc, char **argv)
         }
  
         daPileUp->FillTree();
+        nSavedSpills += 1;
 
         // Clear all the true and digitized hits of this spill for the next spill
         MDT->DoInitialize();
@@ -185,6 +199,8 @@ int main(int argc, char **argv)
     daIDNuInt->CloseFile();
     daBeamBkg->CloseFile();
     daPileUp->WriteTree();
+
+    std::cout<<" Saved " << nSavedSpills <<" of " << fTotalNumofSpills <<" requested pile-up spills " <<std::endl;
 
     Conf = Configuration::GetInstance();
     Conf->Finalize();

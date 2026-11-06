@@ -47,6 +47,8 @@ $MDTROOT/app/application/appGenPileUpSpill $MDTROOT/example/genPileUpConfig.txt
 ```
 The application generates pile-up events by combining ID neutrino interaction events and beam background events in a spill. 
 
+Input events are read in the order of the file lists, and each one is used at most once. If a list runs out before `TotalNumOfSpills` is reached, the application drops the spill it was filling, saves the completed spills and stops. To avoid using an event twice, do not repeat a file within a list, between `ListIDNuIntFiles` and `ListBeamBkgFiles` (when both rates are above zero), or between parallel jobs.
+
 Input variables are:
 - `ListIDNuIntFiles`,`ListBeamBkgFiles`: list of WCSim output files for the ID and background events
 - `OutFileNamePrefix`: output file name will be something like "OutFileNamePrefix".00000.root
@@ -54,7 +56,7 @@ Input variables are:
 - `InitialSeed`: Random seed
 - `IDNuIntRate`,`BeamBkgRate`: Mean number of ID and background events per spill. In each spill, the actual number of interactions are drawn from a Poisson distribution, and interaction timing according to the bunch structure (see `BeamTiming` class under `app/utilities/WCRootData/`)
 - `UseOD`: Process OD hits
-- `NumOfSpillsSavedPerFile`, `TotalNumOfSpills`: output spill setup
+- `NumOfSpillsSavedPerFile`, `TotalNumOfSpills`: output spill setup. `TotalNumOfSpills` is the maximum number of spills, as fewer are saved if the input runs out
 
 ## How to simulate and access digitized pulses
 Turn on waveform simulation in the parameter file by `< DigitizerType_PMTType = 1 >`.

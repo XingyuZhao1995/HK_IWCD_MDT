@@ -65,12 +65,13 @@ void WCRootDataNuInt::LoadFiles(const char *filename, const vector<string> &list
 
     fWCRootEvtList = list;
     
-    fItrFile = fRnd->Integer(fNumFiles);
+    // Every event is used once, in the order of the list, so start from the very first one
+    fItrFile = 0;
     this->ReadFile(fFileList[fItrFile].first,fWCRootEvtList);
     fFileIdNum = fFileList[fItrFile].second;
     fNumEntries = this->GetEntries();
     this->ReadRooTracker();
-    fItrEntry = fRnd->Integer(fNumEntries);
+    fItrEntry = 0;
 
     std::cout<<" Starting from: " << fFileList[fItrFile].first
              <<" " << fFileList[fItrFile].second
@@ -85,7 +86,7 @@ bool WCRootDataNuInt::Next()
     const int kMaxSkipped = 1000;
     int nSkipped = 0;
 
-    this->ReadNextEntry();
+    if( !this->ReadNextEntry() ){ return false; }
     while( !this->HasSimulatedParticles() )
     {
         std::cout<<" Skipping entry " << this->GetEventIdNumber()
@@ -99,7 +100,7 @@ bool WCRootDataNuInt::Next()
             std::cout<<" -> EXIT "<< std::endl;
             exit(-1);
         }
-        this->ReadNextEntry();
+        if( !this->ReadNextEntry() ){ return false; }
     }
     return true;
 }
@@ -122,25 +123,24 @@ bool WCRootDataNuInt::HasSimulatedParticles() const
     return false;
 }
 
-void WCRootDataNuInt::ReadNextEntry()
+// Returns false once every entry of every input file has been read. The last file is
+// left open, as the caller still closes it. A loop, as a file may have no entries.
+bool WCRootDataNuInt::ReadNextEntry()
 {
-    if( fItrEntry>=fNumEntries )
+    while( fItrEntry>=fNumEntries )
     {
+        if( fItrFile+1>=fNumFiles ){ return false; }
+
         this->CloseFile();
         if( fHasFriend ){ this->CloseFriend(); };
         fItrFile += 1;
-        if( fItrFile==fNumFiles  )
-        {
-            fItrFile = fRnd->Integer(fNumFiles);
-            std::cout<<" Rewiding file from " << fFileList[fItrFile].first <<std::endl;
-        }
         this->ReadFile(fFileList[fItrFile].first,fWCRootEvtList);
         if( fHasFriend ){ this->ReadFriend(fFriendList[fItrFile].first); };
 
         fFileIdNum = fFileList[fItrFile].second;
         fNumEntries = this->GetEntries();
         this->ReadRooTracker();
-        fItrEntry = fRnd->Integer(fNumEntries);
+        fItrEntry = 0;
 
         std::cout<<" Reading " << fFileList[fItrFile].first 
                  <<" " << fFileList[fItrFile].second
@@ -152,6 +152,7 @@ void WCRootDataNuInt::ReadNextEntry()
     if( fRooTrackerT ){ fRooTrackerT->GetEntry(fItrEntry); }
     if( fHasFriend ){ fFriendC->GetEntry(fItrEntry); }
     fItrEntry++;
+    return true;
 }
 
 void WCRootDataNuInt::ReadRooTracker()
