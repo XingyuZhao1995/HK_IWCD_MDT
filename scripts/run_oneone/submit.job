@@ -1,0 +1,10 @@
+executable = /vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/scripts/run_oneone/run_job.sh
+arguments = $(file_url)
+
+initialdir = /vols/hyperk/users/xzhao/HK/IWCD/OutputFiles/MDT_output/logs/
+log = $(CLUSTER).$(PROCESS).log
+output = $(CLUSTER).$(PROCESS).out
+error = $(CLUSTER).$(PROCESS).error
++MaxRuntime = 3600
+
+queue file_url from file_list.txt

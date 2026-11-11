@@ -1,8 +1,8 @@
-executable = /vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/scripts/run/run_job.sh
+executable = /vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/scripts/run_pileup/run_job.sh
 arguments = $(config_url)
 
 initialdir = /vols/hyperk/users/xzhao/HK/IWCD/OutputFiles/MDT_output/logs/
-log = $(CLUSTER).log
+log = $(CLUSTER).$(PROCESS).log
 output = $(CLUSTER).$(PROCESS).out
 error = $(CLUSTER).$(PROCESS).error
 +MaxRuntime = 3600

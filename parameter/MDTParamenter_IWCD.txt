@@ -14,12 +14,12 @@
 
 # Dark noise setting
 < DarkAddMode_PMT3inchR12199_02 = 1 > 
-< DarkRate_PMT3inchR12199_02 = 0.0 > // kHz
+< DarkRate_PMT3inchR12199_02 = 1.0 > // kHz
 < DarkM0WindowLow_PMT3inchR12199_02 = 0. > // ns
 < DarkM0WindowUp_PMT3inchR12199_02 = 100000. > // ns
 < DarkM1Window_PMT3inchR12199_02 = 400. > // ns
 < DarkAddMode_PMT3inchR12199_02_OD = 1 > 
-< DarkRate_PMT3inchR12199_02_OD = 0.0 > // kHz
+< DarkRate_PMT3inchR12199_02_OD = 1.0 > // kHz
 < DarkM0WindowLow_PMT3inchR12199_02_OD = 0. > // ns
 < DarkM0WindowUp_PMT3inchR12199_02_OD = 100000. > // ns
 < DarkM1Window_PMT3inchR12199_02_OD = 400. > // ns

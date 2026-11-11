@@ -4,7 +4,7 @@
 ConfigFile=${1}
 
 # Run script
-RunScript="/vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/scripts/run/run_container.sh"
+RunScript="/vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/scripts/run_pileup/run_container.sh"
 
 export APPTAINER_CACHEDIR="/vols/hyperk/users/xzhao/Containers/cache"
 export APPTAINER_TMPDIR="/vols/hyperk/users/xzhao/Containers/tmp"
