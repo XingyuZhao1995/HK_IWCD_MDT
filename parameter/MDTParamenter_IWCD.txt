@@ -1,48 +1,72 @@
 # Parameter setting 
 
 # Trigger setting
-< NDigitsThreshold_PMT3inchR12199_02 = 25 >
-< NDigitsStepSize_PMT3inchR12199_02 = 5 >
-< NDigitsPostTriggerWindow_PMT3inchR12199_02 = +950. >
-< NDigitsPreTriggerWindow_PMT3inchR12199_02 = -400. >
-< FailurePostTriggerWindow_PMT3inchR12199_02 = +950. > # seems to be +950 by default //+100000.
-< FailurePreTriggerWindow_PMT3inchR12199_02 = -400. >
-< FailureTime_PMT3inchR12199_02 = 100. >
-< NDigitsWindow_PMT3inchR12199_02 = 200. >
-< TriggerType_PMT3inchR12199_02 = NoTrig >
-< TriggerType_PMT3inchR12199_02_OD = NoTrig >
+< TriggerType_PMT3inchR14374_WCTE = NoTrig >
+< TriggerType_PMT3inchR14374_WCTE_OD = NoTrig >
+
+< NDigitsThreshold_PMT3inchR14374_WCTE = 25 >
+< NDigitsStepSize_PMT3inchR14374_WCTE = 5 >
+< NDigitsPostTriggerWindow_PMT3inchR14374_WCTE = +950. >
+< NDigitsPreTriggerWindow_PMT3inchR14374_WCTE = -400. >
+< FailurePostTriggerWindow_PMT3inchR14374_WCTE = +950. > # seems to be +950 by default //+100000.
+< FailurePreTriggerWindow_PMT3inchR14374_WCTE = -400. >
+< FailureTime_PMT3inchR14374_WCTE = 100. >
+< NDigitsWindow_PMT3inchR14374_WCTE = 200. >
 
 # Dark noise setting
-< DarkAddMode_PMT3inchR12199_02 = 1 > 
-< DarkRate_PMT3inchR12199_02 = 1.0 > // kHz
-< DarkM0WindowLow_PMT3inchR12199_02 = 0. > // ns
-< DarkM0WindowUp_PMT3inchR12199_02 = 100000. > // ns
-< DarkM1Window_PMT3inchR12199_02 = 400. > // ns
-< DarkAddMode_PMT3inchR12199_02_OD = 1 > 
-< DarkRate_PMT3inchR12199_02_OD = 1.0 > // kHz
-< DarkM0WindowLow_PMT3inchR12199_02_OD = 0. > // ns
-< DarkM0WindowUp_PMT3inchR12199_02_OD = 100000. > // ns
-< DarkM1Window_PMT3inchR12199_02_OD = 400. > // ns
+< DarkAddMode_PMT3inchR14374_WCTE = 1 > 
+< DarkRate_PMT3inchR14374_WCTE = 1.0 > // kHz
+< DarkM0WindowLow_PMT3inchR14374_WCTE = 0. > // ns
+< DarkM0WindowUp_PMT3inchR14374_WCTE = 100000. > // ns
+< DarkM1Window_PMT3inchR14374_WCTE = 400. > // ns
+
+< DarkAddMode_PMT3inchR14374_WCTE_OD = 1 > 
+< DarkRate_PMT3inchR14374_WCTE_OD = 1.0 > // kHz
+< DarkM0WindowLow_PMT3inchR14374_WCTE_OD = 0. > // ns
+< DarkM0WindowUp_PMT3inchR14374_WCTE_OD = 100000. > // ns
+< DarkM1Window_PMT3inchR14374_WCTE_OD = 400. > // ns
 
 # 3" PMT setting
-< TimingResConstant_PMT3inchR12199_02 = 1.890 > # TTS(FWHM) = 1ns at 1 charge
-< TimingResMinimum_PMT3inchR12199_02 = 0.58 >
-< ScalFactorTTS_PMT3inchR12199_02 = 1 >
-< SPECDFFile_PMT3inchR12199_02 = $MDTROOT/parameter/SPE_CDF_PMT3inchR12199_02.txt >
-< TimingResConstant_PMT3inchR12199_02_OD = 1.890 > # TTS(FWHM) = 1ns at 1 charge
-< TimingResMinimum_PMT3inchR12199_02_OD = 0.58 >
-< ScalFactorTTS_PMT3inchR12199_02_OD = 1 >
-< SPECDFFile_PMT3inchR12199_02_OD = $MDTROOT/parameter/SPE_CDF_PMT3inchR12199_02.txt >
+< TimingResConstant_PMT3inchR14374_WCTE = 1.890 > # TTS(FWHM) = 1ns at 1 charge
+< TimingResMinimum_PMT3inchR14374_WCTE = 0.58 >
+< ScalFactorTTS_PMT3inchR14374_WCTE = 1 >
+< SPECDFFile_PMT3inchR14374_WCTE = $MDTROOT/parameter/SPE_CDF_PMT3inchR14374_WCTE.txt >
+
+< TimingResConstant_PMT3inchR14374_WCTE_OD = 1.890 > # TTS(FWHM) = 1ns at 1 charge
+< TimingResMinimum_PMT3inchR14374_WCTE_OD = 0.58 >
+< ScalFactorTTS_PMT3inchR14374_WCTE_OD = 1 >
+< SPECDFFile_PMT3inchR14374_WCTE_OD = $MDTROOT/parameter/SPE_CDF_PMT3inchR14374_WCTE.txt >
 
 # Digitizer setting
-< DigiHitIntegrationWindow = 200 >  // ns
+< DigitizerType_PMT3inchR14374_WCTE = 1 > # 0 = default WCSim digitizer, 1 = Waveform digitizer
+< DigitizerType_PMT3inchR14374_WCTE_OD = 1 >
+
+< DigiHitIntegrationWindow = 144 >  // ns
 < PrecisionTiming = 0.1 > // ns 
 < PrecisionCharge = 0. >
 < ApplyDAQEfficiency = 1 >
+
+< WaveformFile = $MDTROOT/parameter/pmt_sig_ref_phot_fft_iterp_1.txt > # 1PE pulse waveform (amplitude = 2048)
+< AmplitudeSigma = 0.37 > # 1PE amplitude sigma in fraction
+< ADCMax = 61440 > # ADC dynamic range ~ 30PE
+< ADCOverflow = 0 > # Overflow causes ADC values to flip to negative
+< WaveformOffset = 0 > # ns
+< RandomSampleStartTime = 1 > # 1 = Waveform window start time is randomized with Uniform(0,SamplingInterval)
+< SamplingInterval = 8 > # ns
+< SamplingResolution = 0.1 >
+< AmplitudeThreshold = 683 > # self-trigger threshold (1/3 PE)
+< IntegralPreceding = 2 >  # self-trigger integral
+< IntegralFollowing = 4 > 
+< HitInsensitivityPeriod = 8 > # Dead time period
+< ChargeWindowBefore = 5 > # charge integration period
+< ChargeWindowAfter = 2 >
+< ADCToPE = 4627 > # empirical conversion from adc to digi Q
+< DigiTimeOffset = -30.1 > # ns, correction to digi T
+< SaveWaveform = 1 > # Save the digitized waveform in output
 
 # After pulse setting
 < APDoAdd = 0 >
 
 # Output setting
 < TimeOffset = 950. >
-< FlagMultDigits = 0 >
+< FlagMultDigits = 1 >

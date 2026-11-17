@@ -52,15 +52,16 @@ int main(int argc, char **argv)
     delete rndm; rndm = 0;
 
     // IWCD PMT type for ID and OD
+    // IWCD uses the same R14374 as WCTE
     int NPMTType = !fUseOD ? 1 : 2 ;
     vector<string> fPMTType(NPMTType);
-    fPMTType[0] = "PMT3inchR12199_02";
-    if (fUseOD>0) fPMTType[1] = "PMT3inchR12199_02_OD";
+    fPMTType[0] = "PMT3inchR14374_WCTE";
+    if (fUseOD>0) fPMTType[1] = "PMT3inchR14374_WCTE_OD";
 
     // Will be manaing marging true hits and digitizing merged true hits
     MDTManager *MDT = new MDTManager(seed_mdt);
-    MDT->RegisterPMTType(fPMTType[0], new PMTResponse3inchR12199_02());
-    if (fUseOD) MDT->RegisterPMTType(fPMTType[1], new PMTResponse3inchR12199_02());
+    MDT->RegisterPMTType(fPMTType[0], new Response3inchR14374_WCTE());
+    if (fUseOD) MDT->RegisterPMTType(fPMTType[1], new Response3inchR14374_WCTE());
 
     vector<string> listWCRootEvt(NPMTType);
     listWCRootEvt[0] = "wcsimrootevent";
