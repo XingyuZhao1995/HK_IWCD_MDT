@@ -62,7 +62,7 @@
 < ChargeWindowAfter = 2 >
 < ADCToPE = 4627 > # empirical conversion from adc to digi Q
 < DigiTimeOffset = -30.1 > # ns, correction to digi T
-< SaveWaveform = 1 > # Save the digitized waveform in output
+< SaveWaveform = 0 > # Save the digitized waveform in output
 
 # After pulse setting
 < APDoAdd = 0 >
