@@ -318,6 +318,7 @@ void HitDigitizer_mPMT::DigitizeTube(HitTube *aHT, PMTResponse *pr)
         }
     }
 
+    // Last digi hit
     TH1F hWT = BuildWavetrain(digiPEs, fIntegWindow);
     this->FitWavetrain(hWT,vDigiT,vDigiQ);
 
@@ -400,6 +401,7 @@ TH1F HitDigitizer_mPMT::BuildWavetrain(const vector<TrueHit*> PEs, double wavefo
         double val = hWT.GetBinContent(i);
         if (val>fADCMax)
         {
+            // NOTE: need to implement the attenuation curve
             val = fADCMax;
             if (fADCOverflow>0) val = -fADCMax;
         }
@@ -419,22 +421,33 @@ void HitDigitizer_mPMT::FitWavetrain(TH1F hist, vector<double>& vDigiT, vector<d
     vDigiT.clear();
     vDigiQ.clear();
 
+    // Value of a sample clipped at ADCMax, quantized as in BuildWavetrain and stored as float by TH1F
+    double clipLevel = fADCMax;
+    clipLevel = (int)(clipLevel/fDv);
+    clipLevel *= fDv;
+    const float clipLevelF = clipLevel;
+
     // Hit finding algorithm from https://github.com/hyperk/MDT/issues/8
     for (int i=3;i<=hist.GetNbinsX()-2;i++)
     {
         // Amplitude exceeding the threshold
         if (hist.GetBinContent(i)<fAmplitudeThreshold) continue;
         // Local maximum
+        // Ties are allowed with the preceding samples only, so a flat top
+        // (e.g. 3 or more samples clipped at ADCMax) gives one hit on its last sample
         if (hist.GetBinContent(i)<hist.GetBinContent(i-1)) continue;
         if (hist.GetBinContent(i)<=hist.GetBinContent(i+1)) continue;
-        if (hist.GetBinContent(i)<=hist.GetBinContent(i-2)) continue;
+        if (hist.GetBinContent(i)<hist.GetBinContent(i-2)) continue;
         if (hist.GetBinContent(i)<=hist.GetBinContent(i+2)) continue;
         // Integral of 7 samples (preceding and following) exceeds 2x threshold
+        // Not applied to a peak clipped at ADCMax: the undershoot is not clipped,
+        // so for very large pulses it can make the sum negative
         int start = i-fIntegralPreceding >=1 ? i-fIntegralPreceding : 1;
         int end = i+fIntegralFollowing <= hist.GetNbinsX() ? i+fIntegralFollowing : hist.GetNbinsX();
         double integral = 0;
         for (int j=start;j<=end;j++) integral+=hist.GetBinContent(j);
-        if (integral<fAmplitudeThreshold*2) continue;
+        const bool isClipped = hist.GetBinContent(i)>=clipLevelF;
+        if (!isClipped && integral<fAmplitudeThreshold*2) continue;
         // Charge is estimated as the sum of eight samples around the maximum.
         // 5 before and 2 after. The last sample is discarded if negative.
         start = i-fChargeWindowBefore >= 1 ? i-fChargeWindowBefore : 1;

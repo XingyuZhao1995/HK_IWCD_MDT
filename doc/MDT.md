@@ -48,7 +48,7 @@ The `HitDigitizer` class is responsible for converting a collection of True Hits
     *   **Workflow**:
         1.  **`BuildWavetrain`**: Superimposes SPE pulse shapes (loaded from `WaveformFile`) onto a histogram based on true hit times. The SPE amplitude is sampled from a Gaussian distribution of width `fAmplitudeSigma`.
         2.  **`FitWavetrain`**: Analyzes the generated waveform to extract hits.
-            *   **Hit Finding**: Looks for local maxima exceeding `fAmplitudeThreshold`.
+            *   **Hit Finding**: Looks for local maxima exceeding `fAmplitudeThreshold`. A flat top (e.g. samples clipped at `fADCMax`) counts as one peak on its last sample, and a clipped peak is not subject to the integral cut.
             *   **Time**: Uses Linear Interpolation (CFD-like) to find the zero-crossing point.
             *   **Charge**: Integrates samples around the peak (`fChargeWindowBefore`, `fChargeWindowAfter`).
 
