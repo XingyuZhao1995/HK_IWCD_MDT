@@ -20,10 +20,6 @@ get_directory_property(_incs INCLUDE_DIRECTORIES)
 list(FILTER _incs EXCLUDE REGEX "/include/WCSim/?$")
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${_incs}")
 
-# A WCSim built with -DWCSim_WCSimRoot_only=ON exports the package "WCSimRoot"
-# (target WCSimRoot::WCSimRoot) instead of "WCSim", so hk_package(WCSim) above
-# only ever finds the container's copy. Prefer the own build when it exists
-# (this_wcsim.sh sets WCSIM_BUILD_DIR to its install prefix).
 find_package(WCSimRoot QUIET HINTS $ENV{WCSIM_BUILD_DIR})
 
 add_definitions(-DHYBRIDWCSIM)
@@ -37,7 +33,6 @@ else()
     message(STATUS "Using WCSim from ${WCSim_DIR}")
     list( APPEND PUBLIC_EXT_LIBS
             WCSim::WCSimRoot
-            WCSim::WCSimCore
     )
 endif()
 
