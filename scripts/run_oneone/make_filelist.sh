@@ -17,9 +17,9 @@ fi
 rm -rf ${FileListPath}/*.txt
 
 # How many files to be put in each list
-NFilePerList=10
+NFilePerList=20
 # How many jobs to be submitted
-NJobs=20
+NJobs=40
 
 # Loop over input files
 FileCount=0
