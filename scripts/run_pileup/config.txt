@@ -2,7 +2,7 @@
 
 < ListIDNuIntFiles = input_nu.txt >
 < ListBeamBkgFiles = input_bkg.txt >
-< OutFileNamePrefix = /vols/hyperk/users/xzhao/HK/IWCD/OutputFiles/MDT_output/flux23av1_p320_nd25/ >
+< OutFileNamePrefix = /vols/hyperk/users/xzhao/HK/IWCD/OutputFiles/MDT_output/pileup/ >
 < MDTParFile = /vols/hyperk/users/xzhao/HK/IWCD/IWCDSoftware/MDT/parameter/MDTParamenter_IWCD.txt >
 < InitialSeed = 1234 >
 < IDNuIntRate = 2 >
